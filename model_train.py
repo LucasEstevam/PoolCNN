@@ -4,6 +4,7 @@ import tensorflow as tf
 import time
 import numpy as np
 from datetime import datetime
+import os
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -13,7 +14,7 @@ tf.app.flags.DEFINE_string('train_dir', 'train',
 tf.app.flags.DEFINE_integer('batch_size', 100,
                             """Number of images to process in a batch.""")
 
-tf.app.flags.DEFINE_integer('run_epochs', 20,
+tf.app.flags.DEFINE_integer('run_epochs', 50,
                             """ Number of epochs to run training for.""")
 
 # Constants describing the training process.
@@ -95,7 +96,9 @@ def train():
                                             graph_def=sess.graph.as_graph_def(add_shapes=True))
 
     num_steps = num_batches_per_epoch * FLAGS.run_epochs
+    saver = tf.train.Saver(tf.all_variables())
 
+    print('will run for ' + str(num_steps) + ' steps')
     for step in xrange(num_steps):
         start_time = time.time()
         _, loss_value = sess.run([train_op, loss])
@@ -116,6 +119,10 @@ def train():
         if step % 100 == 0:
             summary_str = sess.run(summary_op)
             summary_writer.add_summary(summary_str, step)
+
+        if step % 1000 == 0 or (step + 1) == num_steps:
+            checkpoint_path = os.path.join(FLAGS.train_dir, 'model.ckpt')
+            saver.save(sess, checkpoint_path, global_step=step)
 
 
 def main(argv=None):

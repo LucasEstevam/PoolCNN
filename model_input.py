@@ -54,3 +54,18 @@ def distorted_inputs(filenames, batch_size):
 
     return generate_batch(distorted_image, label,
                           min_queue_examples, batch_size)
+
+
+def regular_inputs(filenames, batch_size):
+    filename_queue = tf.train.string_input_producer(filenames)
+
+    image, label = readRecords(filename_queue)
+
+    image = tf.image.per_image_whitening(image)
+    min_fraction_examples_in_queue = 0.4
+    num_examples_per_epoch = TRAINING_SET_SIZE
+    min_queue_examples = int(num_examples_per_epoch *
+                             min_fraction_examples_in_queue)
+
+    return generate_batch(image, label,
+                          min_queue_examples, batch_size)

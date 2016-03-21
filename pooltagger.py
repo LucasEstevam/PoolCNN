@@ -1,8 +1,19 @@
+"""
+Simple image tagger for two class classification. 
+
+Reads images in folder IMGDIR. Images can be tagged by pressing a or d 
+for classes 0 and 1 respectively.
+Arrows can be used to move through images.
+
+Outputs a json file with the tagged class by filename.
+
+"""
+
+
 import os
 from Tkinter import *
 from PIL import Image, ImageTk
 import json
-import pdb
 
 IMGDIR = "H:/Dev/pools/images-split/splits/"
 DICTFILE = "dict.json"
