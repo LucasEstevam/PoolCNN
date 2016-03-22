@@ -14,7 +14,7 @@ tf.app.flags.DEFINE_string('eval_dir', 'eval',
 tf.app.flags.DEFINE_string('checkpoint_dir', 'train',
                            """Directory where to read model checkpoints.""")
 
-tf.app.flags.DEFINE_integer('batch_size', 100,
+tf.app.flags.DEFINE_integer('eval_batch_size', 100,
                             """Number of images to process in a batch.""")
 
 tf.app.flags.DEFINE_boolean('test', False,
@@ -42,10 +42,13 @@ def eval_once(saver, summary_writer, top_k_op, summary_op):
         for qr in tf.get_collection(tf.GraphKeys.QUEUE_RUNNERS):
             threads.extend(qr.create_threads(sess, coord=coord, daemon=True,
                                              start=True))
+        if(FLAGS.test):
+            num_iter = int(math.ceil(model_input.TEST_SET_SIZE / FLAGS.eval_batch_size))
+        else:
+            num_iter = int(math.ceil(model_input.TRAINING_SET_SIZE / FLAGS.eval_batch_size))
 
-        num_iter = int(math.ceil(model_input.TEST_SET_SIZE / FLAGS.batch_size))
         true_count = 0  # Counts the number of correct predictions.
-        total_sample_count = num_iter * FLAGS.batch_size
+        total_sample_count = num_iter * FLAGS.eval_batch_size
         step = 0
         while step < num_iter and not coord.should_stop():
             predictions = sess.run([top_k_op])
@@ -98,7 +101,7 @@ def main(argv=None):
     if tf.gfile.Exists(FLAGS.eval_dir):
    	    tf.gfile.DeleteRecursively(FLAGS.eval_dir)
     tf.gfile.MakeDirs(FLAGS.eval_dir)
-    evaluate(FLAGS.test, FLAGS.batch_size,FLAGS.eval_dir)
+    evaluate(FLAGS.test, FLAGS.eval_batch_size,FLAGS.eval_dir)
 
 
 if __name__ == '__main__':
