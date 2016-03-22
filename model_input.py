@@ -2,6 +2,7 @@ import tensorflow as tf
 
 IMAGE_SIZE = 128
 TRAINING_SET_SIZE = 8000
+TEST_SET_SIZE = 1200
 
 
 def readRecords(filename_queue):
@@ -56,14 +57,19 @@ def distorted_inputs(filenames, batch_size):
                           min_queue_examples, batch_size)
 
 
-def regular_inputs(filenames, batch_size):
+def regular_inputs(filenames, batch_size, test):
     filename_queue = tf.train.string_input_producer(filenames)
 
     image, label = readRecords(filename_queue)
 
     image = tf.image.per_image_whitening(image)
     min_fraction_examples_in_queue = 0.4
-    num_examples_per_epoch = TRAINING_SET_SIZE
+    
+    if(test):
+        num_examples_per_epoch = TEST_SET_SIZE
+    else:
+        num_examples_per_epoch = TRAINING_SET_SIZE
+
     min_queue_examples = int(num_examples_per_epoch *
                              min_fraction_examples_in_queue)
 
